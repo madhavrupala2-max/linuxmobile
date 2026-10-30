@@ -1,0 +1,19 @@
+#!/bin/sh
+# Stand-in for Termux's termux-x11 (x11-repo) in the Docker box: Xvfb on
+# the same display, with the same argv. ~/.fake-x11 picks a failure the
+# real loader reports (shell-loader/build.gradle in termux/termux-x11).
+case "$(cat "$HOME/.fake-x11" 2>/dev/null)" in
+no-app)
+    echo "Termux:X11 application is not found."
+    echo "You should choose latest release here: "
+    echo " https://github.com/termux/termux-x11/releases/tag/nightly"
+    exit 0 ;;
+signature)
+    echo "Signature verification of target application com.termux.x11 failed."
+    exit 0 ;;
+esac
+display=$1
+shift
+# ~/.fake-x11-size: the screen, e.g. 1080x2400 for a portrait phone.
+size=$(cat "$HOME/.fake-x11-size" 2>/dev/null || echo 1280x720)
+exec Xvfb "$display" -screen 0 "${size}x24" -nolisten tcp "$@"
